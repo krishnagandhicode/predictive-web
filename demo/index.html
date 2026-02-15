@@ -175,14 +175,35 @@
         }
 
         .sandbox-btn {
+            position: relative; /* FIXED: For absolute badge positioning */
             padding: 24px 32px;
             font-size: 18px;
             font-weight: 600;
             border: none;
             border-radius: 12px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s ease-out;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* FIXED: Prediction badge with no layout shift */
+        .sandbox-btn::after {
+            content: var(--confidence, '');
+            opacity: var(--badge-opacity, 0);
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(251, 191, 36, 0.95);
+            color: #78350f;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
+            transition: opacity 0.2s ease-out;
+            pointer-events: none;
+            white-space: nowrap;
         }
 
         .sandbox-btn:hover {
@@ -190,30 +211,11 @@
             box-shadow: 0 8px 16px rgba(0,0,0,0.2);
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-            color: white;
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
-            color: white;
-        }
-
-        .btn-warning {
-            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
-            color: white;
-        }
-
-        .btn-info {
-            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-            color: white;
-        }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: white; }
+        .btn-danger { background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%); color: white; }
+        .btn-info { background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); color: white; }
 
         .btn-large {
             grid-column: span 2;
@@ -231,31 +233,18 @@
             gap: 15px;
         }
 
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .stat-label {
-            font-size: 0.9em;
-            color: #718096;
-            margin-top: 5px;
-        }
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 2em; font-weight: bold; color: #667eea; }
+        .stat-label { font-size: 0.9em; color: #718096; margin-top: 5px; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>🎯 ZORD v2.0</h1>
-            <p>Data Collection Sandbox - Record Real Mouse Behavior</p>
+            <p>Data Collection & Real-Time Prediction Sandbox</p>
         </div>
 
-        <!-- Control Panel -->
         <div class="control-panel">
             <h2>📊 Control Panel</h2>
             
@@ -265,12 +254,8 @@
             </div>
 
             <div class="button-group">
-                <button class="control-btn btn-start" id="btnStartRecording">
-                    ⏺ Start Recording
-                </button>
-                <button class="control-btn btn-stop" id="btnStopDownload" disabled>
-                    ⏹ Stop & Download
-                </button>
+                <button class="control-btn btn-start" id="btnStartRecording">⏺ Start Recording</button>
+                <button class="control-btn btn-stop" id="btnStopDownload" disabled>⏹ Stop & Download</button>
             </div>
 
             <div class="stats">
@@ -289,46 +274,32 @@
             </div>
         </div>
 
-        <!-- Sandbox Area -->
         <div class="sandbox">
             <h2>🎮 Sandbox Area</h2>
             
             <div class="sandbox-info">
-                <strong>Instructions:</strong> Click "Start Recording" above, then move your mouse around and click these buttons naturally. When finished, click "Stop & Download" to save your session data.
+                <strong>Test The Brain:</strong> Move your mouse around. The LogicBrain will highlight the button it predicts you will click <em>before</em> you reach it!
             </div>
 
             <div class="sandbox-buttons">
-                <button class="sandbox-btn btn-success" id="btn1">
-                    🛒 Add to Cart
-                </button>
-                
-                <button class="sandbox-btn btn-primary" id="btn2">
-                    ✉️ Subscribe
-                </button>
-                
-                <button class="sandbox-btn btn-danger" id="btn3">
-                    ❌ Cancel
-                </button>
-                
-                <button class="sandbox-btn btn-warning" id="btn4">
-                    ⚙️ Settings
-                </button>
-                
-                <button class="sandbox-btn btn-info btn-large" id="btn5">
-                    💳 Proceed to Checkout
-                </button>
+                <button class="sandbox-btn btn-success" id="btn1">🛒 Add to Cart</button>
+                <button class="sandbox-btn btn-primary" id="btn2">✉️ Subscribe</button>
+                <button class="sandbox-btn btn-danger" id="btn3">❌ Cancel</button>
+                <button class="sandbox-btn btn-warning" id="btn4">⚙️ Settings</button>
+                <button class="sandbox-btn btn-info btn-large" id="btn5">💳 Proceed to Checkout</button>
             </div>
         </div>
     </div>
 
     <script type="module">
-        import ZordObserver from '../src/core/ZordObserver.js';
+        import ZordObserver from '/src/core/ZordObserver.js';
+        import LogicBrain from '/src/brains/LogicBrain.js';
+        import ZordManager from '/src/core/ZordManager.js';
 
-        // Initialize observer
-        const observer = new ZordObserver({
-            windowSize: 16,
-            samplingRate: 16
-        });
+        // 1. Initialize the components
+        const observer = new ZordObserver({ windowSize: 16, samplingRate: 16 });
+        const brain = new LogicBrain();
+        const manager = new ZordManager({ observer, brain });
 
         // DOM elements
         const statusDisplay = document.getElementById('statusDisplay');
@@ -340,17 +311,54 @@
         const clickCount = document.getElementById('clickCount');
         const durationDisplay = document.getElementById('duration');
 
-        // State
+        // FIXED: Cache buttons ONCE (performance optimization)
+        const sandboxButtons = Array.from(document.querySelectorAll('.sandbox-btn'));
+
         let recordingStartTime = 0;
         let durationInterval = null;
         let currentFrameCount = 0;
         let currentClickCount = 0;
 
-        // Start observer on page load
+        // 2. Start the observer (Eyes open)
         observer.start();
         console.log('[Demo] Observer started');
+        
+        // 3. Register our targets and start the Manager
+        manager.setTargets('.sandbox-btn');
+        manager.start();
 
-        // Subscribe to window updates to track frame count
+        // FIXED: Update target positions on scroll/resize
+        window.addEventListener('scroll', () => manager.refreshTargets());
+        window.addEventListener('resize', () => manager.refreshTargets());
+
+        // 4. The Magic: Listen for predictions!
+        manager.onPrediction((prediction) => {
+            // FIXED: Reset all buttons using cached array (no DOM query)
+            sandboxButtons.forEach(btn => {
+                btn.style.transform = 'scale(1)';
+                btn.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+                btn.style.opacity = '0.7';
+                // FIXED: Hide badge with CSS variable (no layout shift)
+                btn.style.setProperty('--badge-opacity', '0');
+            });
+
+            // Highlight the predicted target
+            if (prediction.predictedTargetId && prediction.confidence > 0.4) {
+                const targetBtn = document.getElementById(prediction.predictedTargetId);
+                if (targetBtn) {
+                    targetBtn.style.transform = 'scale(1.05)';
+                    targetBtn.style.boxShadow = '0 0 25px 5px rgba(255, 215, 0, 0.8)';
+                    targetBtn.style.opacity = '1';
+                    
+                    // FIXED: Update CSS variables instead of innerHTML (no layout shift)
+                    const percent = Math.round(prediction.confidence * 100);
+                    targetBtn.style.setProperty('--confidence', '"⚡ ' + percent + '%"');
+                    targetBtn.style.setProperty('--badge-opacity', '1');
+                }
+            }
+        });
+
+        // 5. Data Collection Logic (Retained from Phase 1)
         observer.subscribe((window) => {
             if (observer.isRecording) {
                 currentFrameCount = observer.sessionBuffer.filter(f => f.type !== 'click').length;
@@ -358,7 +366,6 @@
             }
         });
 
-        // Track clicks
         document.addEventListener('click', (e) => {
             if (observer.isRecording && e.target.classList.contains('sandbox-btn')) {
                 currentClickCount++;
@@ -366,21 +373,18 @@
             }
         });
 
-        // Start Recording button
         btnStartRecording.addEventListener('click', () => {
             observer.startRecording();
             recordingStartTime = Date.now();
             currentFrameCount = 0;
             currentClickCount = 0;
 
-            // Update UI
             statusDisplay.classList.add('recording');
             statusIndicator.classList.add('active');
             statusText.textContent = 'Recording: ON';
             btnStartRecording.disabled = true;
             btnStopDownload.disabled = false;
 
-            // Start duration counter
             durationInterval = setInterval(() => {
                 const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
                 durationDisplay.textContent = `${elapsed}s`;
@@ -389,20 +393,14 @@
             console.log('[Demo] Recording started');
         });
 
-        // Stop & Download button
         btnStopDownload.addEventListener('click', () => {
             observer.stopRecording();
-
-            // Stop duration counter
             if (durationInterval) {
                 clearInterval(durationInterval);
                 durationInterval = null;
             }
 
-            // Get session data
             const sessionJSON = observer.exportSession();
-
-            // Create blob and download
             const blob = new Blob([sessionJSON], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             
@@ -414,7 +412,6 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
-            // Update UI
             statusDisplay.classList.remove('recording');
             statusIndicator.classList.remove('active');
             statusText.textContent = 'Recording: OFF - Session Downloaded';
@@ -422,8 +419,7 @@
             btnStopDownload.disabled = true;
 
             console.log('[Demo] Recording stopped and session downloaded');
-            
-            // Reset observer for next session
+
             setTimeout(() => {
                 observer.reset();
                 frameCount.textContent = '0';
